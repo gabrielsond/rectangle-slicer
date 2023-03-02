@@ -125,8 +125,6 @@
             sortedDesiredDimensions = parseRectangles(document.getElementById('desired-dimensions')).sort((a, b) => b.height * b.width - a.height * a.width);
             sortedSizes = parseRectangles(document.getElementById('sorted-sizes')).sort((a, b) => a.height * a.width - b.height * b.width);
 
-            // document.getElementById('sorted-sizes').
-
             cutPieces(); // main function
 
             // render visuals
