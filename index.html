@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rectangle-slicer Implementation</title>
+    <style>
+        svg {
+            padding-right: 2px;
+        }
+    </style>
+    <script src="slicer.js"></script>
+</head>
+
+<body>
+    <form>
+        <label for="width-input">Width:</label>
+        <input type="number" id="width-input">
+        <br>
+        <label for="height-input">Height:</label>
+        <input type="number" id="height-input">
+        <br>
+        <button type="button" onclick="addDimension()">Add Dimension</button>
+        <br>
+
+        <label for="desired-dimensions">Desired Dimensions:</label>
+        <select id="desired-dimensions" multiple>
+        </select>
+        <br>
+        <label for="sorted-sizes">Sorted Sizes:</label>
+        <select id="sorted-sizes" multiple>
+        </select>
+        <br>
+        <input type="submit" value="Submit" onclick="performCuts(); return false;">
+    </form>
+
+    <h1>Required Pieces</h1>
+    <div id="required"></div>
+    <h1>Completed Pieces</h1>
+    <div id="completed"></div>
+    <h1>Leftover Pieces</h1>
+    <div id="leftover"></div>
+
+    <script>
+        function addDimension() {
+            const width = document.getElementById("width-input").value;
+            const height = document.getElementById("height-input").value;
+            const option = document.createElement("option");
+            option.text = `${height} x ${width}`;
+            option.value = `${height} x ${width}`;
+            document.getElementById("desired-dimensions").add(option);
+        }
+
+        const desiredDimensions = correctOrientation([
+            { height: 400, width: 1002 },
+            { height: 1002, width: 2813 },
+            { height: 1002, width: 2813 },
+            { height: 2813, width: 1002 },
+            { height: 2813, width: 1002 },
+            { height: 1002, width: 2813 },
+            { height: 2813, width: 1002 }
+        ]);
+
+        const size1 = { height: 3600, width: 2600 };
+        const size2 = { height: 3000, width: 2600 };
+        const size3 = { height: 2700, width: 2600 };
+        const size4 = { height: 2300, width: 2600 };
+        const size5 = { height: 1800, width: 2600 };
+        const size6 = { height: 1500, width: 2600 };
+        const size7 = { height: 1150, width: 2600 };
+        const size8 = { height: 900, width: 2600 };
+        const size9 = { height: 3600, width: 1300 };
+        const size10 = { height: 3000, width: 1300 };
+        const size11 = { height: 2300, width: 1300 };
+        const size12 = { height: 1800, width: 1300 };
+        const sizes = correctOrientation([
+            size1,
+            size2,
+            size3,
+            size4,
+            size5,
+            size6,
+            size7,
+            size8,
+            size9,
+            size10,
+            size11,
+            size12
+        ]);
+
+        // Sort size by area ascending (to choose the smallest size for the required cut)
+        let sortedSizes = sizes.sort((a, b) => a.height * a.width - b.height * b.width);
+        sortedSizes.forEach(size => {
+            const option = document.createElement('option');
+            option.value = `${size.height} x ${size.width}`;
+            option.text = `${size.height} x ${size.width}`;
+            document.getElementById('sorted-sizes').add(option);
+        });
+        // Sort desired dimensions by area descending (to start with the biggest cut first)
+        let sortedDesiredDimensions = desiredDimensions.sort((a, b) => b.height * b.width - a.height * a.width);
+        sortedDesiredDimensions.forEach(dimensions => {
+            const option = document.createElement('option');
+            option.value = `${dimensions.height} x ${dimensions.width}`;
+            option.text = `${dimensions.height} x ${dimensions.width}`;
+            document.getElementById('desired-dimensions').add(option);
+        });
+
+        let scale = 0.1; // TODO: improve to auto-scale
+
+        let availablePieces = [];
+        let finishedPieces = [];
+        let requiredSizes = [];
+
+        function performCuts() {
+            // re-initialize
+            availablePieces = [];
+            finishedPieces = [];
+            requiredSizes = [];
+
+            document.getElementById("required").innerHTML = '';
+            document.getElementById("completed").innerHTML = '';
+            document.getElementById("leftover").innerHTML = '';
+            sortedDesiredDimensions = parseRectangles(document.getElementById('desired-dimensions')).sort((a, b) => b.height * b.width - a.height * a.width);
+            sortedSizes = parseRectangles(document.getElementById('sorted-sizes')).sort((a, b) => a.height * a.width - b.height * b.width);
+
+            // document.getElementById('sorted-sizes').
+
+            cutPieces(); // main function
+
+            // render visuals
+            document.getElementById("required").appendChild(generateRectanglesSVGs(requiredSizes));
+            document.getElementById("completed").appendChild(generateRectanglesSVGs(finishedPieces));
+            document.getElementById("leftover").appendChild(generateRectanglesSVGs(sortDimensions(availablePieces, false)));
+        }
+
+        function parseRectangles(select) {
+            const rectangles = [];
+            const options = select.querySelectorAll("option");
+            for (let i = 0; i < options.length; i++) {
+                const parts = options[i].value.split("x").map(str => str.trim());
+                if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                    rectangles.push({ height: parseInt(parts[0]), width: parseInt(parts[1]) });
+                }
+            }
+            return correctOrientation(rectangles);
+        }
+
+    </script>
+</body>
+
+</html>
