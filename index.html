@@ -6,112 +6,97 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>rectangle-slicer Implementation</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <style>
         svg {
             padding-right: 2px;
         }
     </style>
-    <script src="slicer.js"></script>
 </head>
 
 <body>
-    <form>
-        <label for="width-input">Width:</label>
-        <input type="number" id="width-input">
-        <br>
-        <label for="height-input">Height:</label>
-        <input type="number" id="height-input">
-        <br>
-        <button type="button" onclick="addDimension()">Add Dimension</button>
-        <br>
+    <div class="container">
+        <div class="row">
+            <h1>rectangle-slicer UI</h1>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce eget porttitor lacus. Nunc a eros sed
+                nulla
+                tempor iaculis sit amet ac lacus. Proin lobortis bibendum lorem, vel lacinia ligula ullamcorper ut. Sed
+                porta est ut aliquet tristique. Nunc consectetur pretium sem eu eleifend. Praesent vestibulum rhoncus
+                tortor. Aliquam finibus, metus a mattis mattis, nisl urna convallis leo, id fringilla tellus massa et
+                elit.
+                Vivamus vehicula nulla a cursus facilisis. Suspendisse imperdiet eu diam eget finibus. Vestibulum
+                efficitur
+                tempor pulvinar. In hac habitasse platea dictumst. Nunc a est et diam sollicitudin commodo a nec velit.
+                Etiam et lectus et mi luctus viverra at non magna. Duis blandit malesuada est et gravida. Etiam
+                porttitor
+                nisl in enim sodales venenatis. Etiam dui massa, tristique finibus risus non, blandit tempus felis.</p>
+        </div>
+        <div class="row">
+            <div class="col s6">
+                <h2>Desired</h2>
+                <ul class="collection" id="desired-dimension-list"></ul>
+                <div class="row">
+                    <form class="col s12">
+                        <div class="row">
+                            <div class="input-field col s5">
+                                <input id="height" type="number" class="validate">
+                                <label for="height">Height</label>
+                            </div>
+                            <div class="input-field col s5">
+                                <input id="width" type="number" class="validate">
+                                <label for="width">Width</label>
+                            </div>
+                            <div class="input-field col s2">
+                                <a class="waves-effect waves-light btn-small" id="add-dimension-btn">
+                                    <i class="material-icons">add</i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="row">
+                    <div class="col s12">
+                        <button class="btn waves-effect waves-light" type="submit"
+                            onclick="performCuts(); return false;">Slice Rectangles!</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col s6">
+                <h2>Available</h2>
+                <div class="collection" id="available-dimension-list"></div>
+            </div>
+        </div>
+        <div class="row">
+            <h1>Required Pieces</h1>
+            <div id="required"></div>
+        </div>
+        <div class="row">
+            <h1>Completed Pieces</h1>
+            <div id="completed"></div>
+        </div>
+        <div class="row">
+            <h1>Leftover Pieces</h1>
+            <div id="leftover"></div>
+        </div>
+    </div>
 
-        <label for="desired-dimensions">Desired Dimensions:</label>
-        <select id="desired-dimensions" multiple>
-        </select>
-        <br>
-        <label for="sorted-sizes">Sorted Sizes:</label>
-        <select id="sorted-sizes" multiple>
-        </select>
-        <br>
-        <input type="submit" value="Submit" onclick="performCuts(); return false;">
-    </form>
-
-    <h1>Required Pieces</h1>
-    <div id="required"></div>
-    <h1>Completed Pieces</h1>
-    <div id="completed"></div>
-    <h1>Leftover Pieces</h1>
-    <div id="leftover"></div>
-
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="slicer.js"></script>
+    <script src="slicer-vars.js"></script>
     <script>
-        function addDimension() {
-            const width = document.getElementById("width-input").value;
-            const height = document.getElementById("height-input").value;
-            const option = document.createElement("option");
-            option.text = `${height} x ${width}`;
-            option.value = `${height} x ${width}`;
-            document.getElementById("desired-dimensions").add(option);
-        }
+        // Add event listener for add dimension button
+        const addDimensionBtn = document.getElementById('add-dimension-btn');
+        addDimensionBtn.addEventListener('click', addDimension);
 
-        const desiredDimensions = correctOrientation([
-            { height: 400, width: 1002 },
-            { height: 1002, width: 2813 },
-            { height: 1002, width: 2813 },
-            { height: 2813, width: 1002 },
-            { height: 2813, width: 1002 },
-            { height: 1002, width: 2813 },
-            { height: 2813, width: 1002 }
-        ]);
-
-        const size1 = { height: 3600, width: 2600 };
-        const size2 = { height: 3000, width: 2600 };
-        const size3 = { height: 2700, width: 2600 };
-        const size4 = { height: 2300, width: 2600 };
-        const size5 = { height: 1800, width: 2600 };
-        const size6 = { height: 1500, width: 2600 };
-        const size7 = { height: 1150, width: 2600 };
-        const size8 = { height: 900, width: 2600 };
-        const size9 = { height: 3600, width: 1300 };
-        const size10 = { height: 3000, width: 1300 };
-        const size11 = { height: 2300, width: 1300 };
-        const size12 = { height: 1800, width: 1300 };
-        const sizes = correctOrientation([
-            size1,
-            size2,
-            size3,
-            size4,
-            size5,
-            size6,
-            size7,
-            size8,
-            size9,
-            size10,
-            size11,
-            size12
-        ]);
-
-        // Sort size by area ascending (to choose the smallest size for the required cut)
-        let sortedSizes = sizes.sort((a, b) => a.height * a.width - b.height * b.width);
+        // Sort globals and populate UI
         sortedSizes.forEach(size => {
-            const option = document.createElement('option');
-            option.value = `${size.height} x ${size.width}`;
-            option.text = `${size.height} x ${size.width}`;
-            document.getElementById('sorted-sizes').add(option);
+            addDimensionToList(size.height, size.width, document.getElementById('available-dimension-list'));
         });
-        // Sort desired dimensions by area descending (to start with the biggest cut first)
-        let sortedDesiredDimensions = desiredDimensions.sort((a, b) => b.height * b.width - a.height * a.width);
-        sortedDesiredDimensions.forEach(dimensions => {
-            const option = document.createElement('option');
-            option.value = `${dimensions.height} x ${dimensions.width}`;
-            option.text = `${dimensions.height} x ${dimensions.width}`;
-            document.getElementById('desired-dimensions').add(option);
+        sortedDesiredDimensions.forEach(dimension => {
+            addDimensionToList(dimension.height, dimension.width, document.getElementById('desired-dimension-list'));
         });
-
-        let scale = 0.1; // TODO: improve to auto-scale
-
-        let availablePieces = [];
-        let finishedPieces = [];
-        let requiredSizes = [];
 
         function performCuts() {
             // re-initialize
@@ -119,32 +104,107 @@
             finishedPieces = [];
             requiredSizes = [];
 
-            document.getElementById("required").innerHTML = '';
-            document.getElementById("completed").innerHTML = '';
-            document.getElementById("leftover").innerHTML = '';
-            sortedDesiredDimensions = parseRectangles(document.getElementById('desired-dimensions')).sort((a, b) => b.height * b.width - a.height * a.width);
-            sortedSizes = parseRectangles(document.getElementById('sorted-sizes')).sort((a, b) => a.height * a.width - b.height * b.width);
+            const requiredEl = document.getElementById("required");
+            const completedEl = document.getElementById("completed");
+            const leftoverEl = document.getElementById("leftover");
+            const desiredListEl = document.getElementById('desired-dimension-list');
+            const availableListEl = document.getElementById('available-dimension-list');
+
+            clearInner(requiredEl, completedEl, leftoverEl);
+            sortedDesiredDimensions = parseRectangles(desiredListEl).sort((a, b) => b.height * b.width - a.height * a.width);
+            sortedSizes = parseRectangles(availableListEl).sort((a, b) => a.height * a.width - b.height * b.width);
 
             cutPieces(); // main function
 
             // render visuals
-            document.getElementById("required").appendChild(generateRectanglesSVGs(requiredSizes));
-            document.getElementById("completed").appendChild(generateRectanglesSVGs(finishedPieces));
-            document.getElementById("leftover").appendChild(generateRectanglesSVGs(sortDimensions(availablePieces, false)));
+            requiredEl.appendChild(generateRectanglesSVGs(requiredSizes));
+            completedEl.appendChild(generateRectanglesSVGs(finishedPieces));
+            leftoverEl.appendChild(generateRectanglesSVGs(sortDimensions(availablePieces, false)));
         }
 
-        function parseRectangles(select) {
+        function parseRectangles(dimensionList) {
             const rectangles = [];
-            const options = select.querySelectorAll("option");
-            for (let i = 0; i < options.length; i++) {
-                const parts = options[i].value.split("x").map(str => str.trim());
-                if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-                    rectangles.push({ height: parseInt(parts[0]), width: parseInt(parts[1]) });
+            const dimensionItems = dimensionList.querySelectorAll(".collection-item");
+            for (let i = 0; i < dimensionItems.length; i++) {
+                const parts = dimensionItems[i].textContent.split("x").map(str => str.trim());
+                const width = parts[0];
+                const height = parts[1].replace(/\D/g, '');
+                if (!isNaN(height) && !isNaN(width)) {
+                    rectangles.push({ height: parseInt(height), width: parseInt(width) });
                 }
             }
             return correctOrientation(rectangles);
         }
 
+        function addDimensionToList(height, width, dimensionList) {
+            const dimensionListItem = createDimensionListItem(height, width);
+            addRemoveButton(dimensionList, dimensionListItem);
+            dimensionList.appendChild(dimensionListItem);
+        }
+
+        function createDimensionListItem(height, width) {
+            const dimensionListItem = document.createElement('a');
+            dimensionListItem.classList.add('collection-item');
+            dimensionListItem.href = "#!"
+            dimensionListItem.innerText = `${height} x ${width}`;
+            return dimensionListItem;
+        }
+
+        function addRemoveButton(dimensionList, dimensionListItem) {
+            const removeButton = document.createElement('a');
+            removeButton.style.visibility = "hidden";
+            removeButton.classList.add('btn-floating', 'red', 'waves-effect', 'waves-light', 'btn-small', 'right');
+            removeButton.innerHTML = '<i class="material-icons">delete</i>';
+            removeButton.addEventListener('click', function () {
+                dimensionList.removeChild(dimensionListItem);
+            });
+            dimensionListItem.appendChild(removeButton);
+            dimensionListItem.addEventListener(
+                "mouseover",
+                (event) => {
+                    removeButton.style.visibility = "visible";
+                },
+                false
+            );
+            dimensionListItem.addEventListener(
+                "mouseout",
+                (event) => {
+                    removeButton.style.visibility = "hidden";
+                },
+                false
+            );
+        }
+
+        function addDimension() {
+            const heightInput = document.getElementById('height');
+            const widthInput = document.getElementById('width');
+            const dimensionList = document.getElementById('desired-dimension-list');
+
+            // Validate input values
+            const height = parseInt(heightInput.value);
+            const width = parseInt(widthInput.value);
+            if (isNaN(height) || isNaN(width)) {
+                alert('Please enter a valid height and width');
+                return;
+            }
+
+            addDimensionToList(height, width, dimensionList);
+            clearInputs(heightInput, widthInput);
+        }
+
+        function clearInputs(...inputs) {
+            inputs.forEach(input => {
+                if (input.type === 'text' || input.type === 'number') {
+                    input.value = '';
+                }
+            });
+        }
+
+        function clearInner(...elements) {
+            elements.forEach(el => {
+                el.innerHTML = '';
+            });
+        }
     </script>
 </body>
 
