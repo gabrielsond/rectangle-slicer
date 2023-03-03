@@ -104,16 +104,24 @@ function canRectangleFit(desired, base) {
 }
 
 function combineRectangles(rect1, rect2) {
-    const minWidth1 = rect1.width + rect2.width;
-    const minHeight1 = Math.max(rect1.height, rect2.height);
-    const area1 = minWidth1 * minHeight1;
-    const minWidth2 = Math.max(rect1.width, rect2.width);
-    const minHeight2 = rect1.height + rect2.height;
-    const area2 = minWidth2 * minHeight2;
-    if (area1 > area2) {
-        return { width: minWidth2, height: minHeight2 };
+    if (rect1 == null && rect2 == null) {
+        return null;
+    } else if (rect1 == null) {
+        return rect2;
+    } else if (rect2 == null) {
+        return rect1;
     } else {
-        return { width: minWidth1, height: minHeight1 };
+        const minWidth1 = rect1.width + rect2.width;
+        const minHeight1 = Math.max(rect1.height, rect2.height);
+        const area1 = minWidth1 * minHeight1;
+        const minWidth2 = Math.max(rect1.width, rect2.width);
+        const minHeight2 = rect1.height + rect2.height;
+        const area2 = minWidth2 * minHeight2;
+        if (area1 > area2) {
+            return { width: minWidth2, height: minHeight2 };
+        } else {
+            return { width: minWidth1, height: minHeight1 };
+        }
     }
 }
 
